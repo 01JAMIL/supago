@@ -1,7 +1,18 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+
+	"github.com/01JAMIL/supago.git/internal/cli"
+)
 
 func main() {
-	fmt.Println("Welcome to SupaGo.")
+	root := cli.NewRootCmd()
+	root.AddCommand(cli.NewInitCmd())
+
+	if err := root.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
