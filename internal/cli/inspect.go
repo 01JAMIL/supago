@@ -35,12 +35,15 @@ func NewInspectCmd() *cobra.Command {
 			}
 			defer pool.Close()
 
+			fmt.Print("\n\n🔍 Inspecting database... \n\n")
+
 			schema, err := introspection.Inspect(ctx, pool)
 			if err != nil {
 				return err
 			}
 
-			fmt.Printf("\n ✅ Database connection successful! \n\n")
+			fmt.Printf("✔ %d tables found\n", schema.TableCount)
+			fmt.Printf("✔ %d columns found\n\n", schema.ColumnCount)
 
 			for _, t := range schema.Tables {
 				fmt.Printf("Table: %s\n", t.Name)
@@ -53,7 +56,11 @@ func NewInspectCmd() *cobra.Command {
 					if c.PrimaryKey {
 						pk = " PK"
 					}
-					fmt.Printf("  %-20s %-25s %s%s\n", c.Name, c.DataType, nullable, pk)
+					fk := ""
+					if c.ForeignKey != nil {
+						fk = fmt.Sprintf("  FK → %s.%s", c.ForeignKey.Table, c.ForeignKey.Column)
+					}
+					fmt.Printf("  %-20s %-25s %s%s%s\n", c.Name, c.DataType, nullable, pk, fk)
 				}
 				fmt.Println()
 			}
