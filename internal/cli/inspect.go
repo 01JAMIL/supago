@@ -16,6 +16,8 @@ func NewInspectCmd() *cobra.Command {
 		Short: "Inspect the database schema",
 		Long:  "Connects to the PostgreSQL database and displays all tables with their columns, types, nullability, and primary keys.",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			PrintBanner()
+
 			ctx := context.Background()
 
 			cfg, err := config.Load("supago.yaml")
@@ -38,7 +40,7 @@ func NewInspectCmd() *cobra.Command {
 				return err
 			}
 
-			fmt.Println(" ✅ Database connection successful!")
+			fmt.Printf("\n ✅ Database connection successful! \n\n")
 
 			for _, t := range schema.Tables {
 				fmt.Printf("Table: %s\n", t.Name)

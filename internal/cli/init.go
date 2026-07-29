@@ -25,6 +25,8 @@ func NewInitCmd() *cobra.Command {
 Verifies that the current directory contains a go.mod file, creates a supago.yaml
 configuration file, and generates a .env.example with the required environment variables.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			PrintBanner()
+
 			if _, err := os.Stat("go.mod"); os.IsNotExist(err) {
 				return fmt.Errorf("go.mod not found: run this command from the root of a Go project")
 			}
