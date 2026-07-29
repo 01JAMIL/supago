@@ -33,9 +33,11 @@ generation:
 
 ## Commands
 
-| Command | Description          |
-| ------- | -------------------- |
+| Command | Description |
+| ------- | ----------- |
 | `init`  | Initialize SupaGo in an existing Go project |
+| `inspect` | Inspect the database schema and display tables, columns, types, and constraints |
+| `generate model` | Generate Go structs from database tables |
 
 ## License
 
