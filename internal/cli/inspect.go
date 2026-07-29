@@ -38,6 +38,8 @@ func NewInspectCmd() *cobra.Command {
 				return err
 			}
 
+			fmt.Println(" ✅ Database connection successful!")
+
 			for _, t := range schema.Tables {
 				fmt.Printf("Table: %s\n", t.Name)
 				for _, c := range t.Columns {
