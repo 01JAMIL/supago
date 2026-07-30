@@ -41,6 +41,3 @@ generation:
 | `generate repository` | Generate Go repositories with full CRUD per table |
 | `generate crud` | Generate services and HTTP handlers using net/http as a starting point |
 
-## License
-
-MIT
