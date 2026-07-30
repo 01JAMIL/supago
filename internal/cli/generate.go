@@ -65,7 +65,7 @@ func newGenerateModelCmd() *cobra.Command {
 				return fmt.Errorf("generate models: %w", err)
 			}
 
-			fmt.Printf("✔ Models generated in %s/models/\n", outputDir)
+			fmt.Printf("✔ Models generated in %s/models.go\n", outputDir)
 
 			return nil
 		},

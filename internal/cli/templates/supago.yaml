@@ -5,4 +5,4 @@ database:
   url: ${SUPAGO_DATABASE_URL}
 
 generation:
-  output: internal/generated
+  output: internal/adapters/supago
