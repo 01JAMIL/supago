@@ -28,7 +28,7 @@ database:
   url: ${SUPAGO_DATABASE_URL}
 
 generation:
-  output: internal/generated
+  output: internal/adapters/supago
 ```
 
 ## Commands
@@ -38,6 +38,7 @@ generation:
 | `init`  | Initialize SupaGo in an existing Go project |
 | `inspect` | Inspect the database schema and display tables, columns, types, and constraints |
 | `generate model` | Generate Go structs from database tables |
+| `generate repository` | Generate Go repositories with full CRUD per table |
 
 ## License
 
