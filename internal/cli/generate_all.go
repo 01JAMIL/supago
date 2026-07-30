@@ -11,24 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewGenerateCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "generate",
-		Short: "Generate code from the database schema",
-	}
-
-	cmd.AddCommand(newGenerateModelCmd())
-	cmd.AddCommand(newGenerateRepositoryCmd())
-	cmd.AddCommand(newGenerateCrudCmd())
-	cmd.AddCommand(newGenerateAllCmd())
-
-	return cmd
-}
-
-func newGenerateModelCmd() *cobra.Command {
+func newGenerateAllCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "model",
-		Short: "Generate Go structs from database tables",
+		Use:   "all",
+		Short: "Run the full generation pipeline (model, repository, crud)",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			PrintBanner()
 
@@ -49,6 +35,11 @@ func newGenerateModelCmd() *cobra.Command {
 			}
 			defer pool.Close()
 
+			modulePath, err := readModulePath()
+			if err != nil {
+				return fmt.Errorf("read go.mod: %w", err)
+			}
+
 			fmt.Print("\n\n🔍 Inspecting database... \n\n")
 
 			schema, err := introspection.Inspect(ctx, pool)
@@ -64,11 +55,29 @@ func newGenerateModelCmd() *cobra.Command {
 				outputDir = "internal/generated"
 			}
 
+			fmt.Println("⚙ Generating models...")
 			if err := generation.GenerateModels(schema, outputDir); err != nil {
 				return fmt.Errorf("generate models: %w", err)
 			}
+			fmt.Println("✔ Models generated")
+			fmt.Println()
 
-			fmt.Printf("✔ Models generated in %s/models.go\n", outputDir)
+			fmt.Println("⚙ Generating repositories...")
+			if err := generation.GenerateRepositories(schema, outputDir, modulePath); err != nil {
+				return fmt.Errorf("generate repositories: %w", err)
+			}
+			fmt.Println("✔ Repositories generated")
+			fmt.Println()
+
+			fmt.Println("⚙ Generating CRUD...")
+			if err := generation.GenerateCRUD(schema, modulePath); err != nil {
+				return fmt.Errorf("generate crud: %w", err)
+			}
+			fmt.Println("✔ Services generated")
+			fmt.Println("✔ Handlers generated")
+			fmt.Println()
+
+			fmt.Println("🎉 SupaGo generation completed successfully!")
 
 			return nil
 		},
