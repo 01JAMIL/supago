@@ -39,6 +39,7 @@ generation:
 | `inspect` | Inspect the database schema and display tables, columns, types, and constraints |
 | `generate model` | Generate Go structs from database tables |
 | `generate repository` | Generate Go repositories with full CRUD per table |
+| `generate crud` | Generate services and HTTP handlers using net/http as a starting point |
 
 ## License
 
