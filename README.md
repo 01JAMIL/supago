@@ -47,3 +47,7 @@ generation:
 | `generate all` | Run the full generation pipeline (model, repository, crud) |
 | `version` | Print the version of SupaGo |
 
+## License
+
+MIT
+
