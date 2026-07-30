@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/branding/supago-logo.png" alt="SupaGo logo" width="714">
+</p>
+
 # SupaGo
 
 Supabase toolkit for Go projects.
