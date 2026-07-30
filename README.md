@@ -40,4 +40,6 @@ generation:
 | `generate model` | Generate Go structs from database tables |
 | `generate repository` | Generate Go repositories with full CRUD per table |
 | `generate crud` | Generate services and HTTP handlers using net/http as a starting point |
+| `generate all` | Run the full generation pipeline (model, repository, crud) |
+| `version` | Print the version of SupaGo |
 
