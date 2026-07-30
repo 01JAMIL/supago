@@ -3,6 +3,8 @@ package cli
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/01JAMIL/supago.git/internal/config"
 	"github.com/01JAMIL/supago.git/internal/database"
@@ -11,22 +13,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewGenerateCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "generate",
-		Short: "Generate code from the database schema",
-	}
-
-	cmd.AddCommand(newGenerateModelCmd())
-	cmd.AddCommand(newGenerateRepositoryCmd())
-
-	return cmd
-}
-
-func newGenerateModelCmd() *cobra.Command {
+func newGenerateRepositoryCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "model",
-		Short: "Generate Go structs from database tables",
+		Use:   "repository",
+		Short: "Generate Go repositories from database tables",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			PrintBanner()
 
@@ -62,13 +52,34 @@ func newGenerateModelCmd() *cobra.Command {
 				outputDir = "internal/generated"
 			}
 
-			if err := generation.GenerateModels(schema, outputDir); err != nil {
-				return fmt.Errorf("generate models: %w", err)
+			modulePath, err := readModulePath()
+			if err != nil {
+				return fmt.Errorf("read go.mod: %w", err)
 			}
 
-			fmt.Printf("✔ Models generated in %s/models.go\n", outputDir)
+			if err := generation.GenerateRepositories(schema, outputDir, modulePath); err != nil {
+				return fmt.Errorf("generate repositories: %w", err)
+			}
+
+			fmt.Printf("✔ Repositories generated in %s/<table>/repository.go\n", outputDir)
 
 			return nil
 		},
 	}
+}
+
+func readModulePath() (string, error) {
+	data, err := os.ReadFile("go.mod")
+	if err != nil {
+		return "", err
+	}
+	lines := strings.SplitN(string(data), "\n", 2)
+	if len(lines) == 0 {
+		return "", fmt.Errorf("invalid go.mod")
+	}
+	parts := strings.Fields(lines[0])
+	if len(parts) < 2 {
+		return "", fmt.Errorf("invalid go.mod: missing module path")
+	}
+	return parts[1], nil
 }
