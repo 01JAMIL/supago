@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/branding/supago-logo.png" alt="SupaGo logo" width="714">
+  <img src="assets/branding/supago-logo.png" alt="SupaGo logo" width="400">
 </p>
 
 # SupaGo
