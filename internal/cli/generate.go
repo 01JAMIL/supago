@@ -19,6 +19,7 @@ func NewGenerateCmd() *cobra.Command {
 
 	cmd.AddCommand(newGenerateModelCmd())
 	cmd.AddCommand(newGenerateRepositoryCmd())
+	cmd.AddCommand(newGenerateCrudCmd())
 
 	return cmd
 }

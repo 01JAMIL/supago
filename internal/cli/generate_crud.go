@@ -11,10 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newGenerateRepositoryCmd() *cobra.Command {
+func newGenerateCrudCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "repository",
-		Short: "Generate Go repositories from database tables",
+		Use:   "crud",
+		Short: "Generate CRUD interfaces, services, and handlers from database tables",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			PrintBanner()
 
@@ -45,22 +45,16 @@ func newGenerateRepositoryCmd() *cobra.Command {
 			fmt.Printf("✔ %d tables found\n", schema.TableCount)
 			fmt.Printf("✔ %d columns found\n\n", schema.ColumnCount)
 
-			outputDir := cfg.Generation.Output
-			if outputDir == "" {
-				outputDir = "internal/generated"
-			}
-
 			modulePath, err := readModulePath()
 			if err != nil {
 				return fmt.Errorf("read go.mod: %w", err)
 			}
 
-			if err := generation.GenerateRepositories(schema, outputDir, modulePath); err != nil {
-				return fmt.Errorf("generate repositories: %w", err)
+			if err := generation.GenerateCRUD(schema, modulePath); err != nil {
+				return fmt.Errorf("generate crud: %w", err)
 			}
 
-			fmt.Printf("✔ Repositories generated in %s/<table>/repository.go\n", outputDir)
-
+			fmt.Println("✔ CRUD generated in internal/<table>/")
 			return nil
 		},
 	}
