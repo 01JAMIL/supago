@@ -19,7 +19,7 @@ func PrintBanner() {
 	fmt.Print(SupagoBanner)
 }
 
-const Version = "0.1.0"
+const Version = "v1.1.0"
 
 func NewRootCmd() *cobra.Command {
 	cmd := &cobra.Command{

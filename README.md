@@ -136,6 +136,89 @@ generation:
   output: internal/adapters/supago
 ```
 
+## Custom queries
+
+Custom queries let you generate repository methods for queries you define yourself, in addition to the standard CRUD operations.
+
+### Why custom queries
+
+The generated CRUD repositories cover common operations (`List`, `GetByID`, `Create`, `Update`, `Delete`). Real applications also need lookups like "find a user by email" or "list posts by author". Custom queries generate those methods for you, with safe parameterized SQL.
+
+### Configuration
+
+Define queries per table under `generation.queries` in `supago.yaml`:
+
+```yaml
+generation:
+  output: internal/adapters/supago
+  queries:
+    users:
+      - name: FindByEmail
+        where:
+          - email = $1
+      - name: FindByEmailAndName
+        where:
+          - email = $1
+          - full_name = $2
+      - name: ListByActive
+        where:
+          - active = $1
+    posts:
+      - name: ListByAuthor
+        where:
+          - author_id = $1
+```
+
+The query name determines the generated method and its return type:
+
+- Names starting with `Find` or `Get` generate a method returning a single item (`*Model`, using `QueryRow`).
+- Names starting with `List` generate a method returning a slice (`[]Model`, using `Query`).
+
+Each `where` entry is a `column OP $N` condition. Column references are validated against the actual database schema.
+
+### CLI usage
+
+Generate the repository methods for your configured queries:
+
+```sh
+supago generate query
+```
+
+This writes `<outputDir>/<table>/queries.go` for each configured table, extending the existing generated repository. Run `supago generate all` (or at least `repository`) once first so the base repositories exist.
+
+If no queries are configured, the command prints a helpful message instead of failing.
+
+### Generated code
+
+For the configuration above, `supago generate query` produces:
+
+```go
+// internal/adapters/supago/users/queries.go
+package users
+
+func (r *Repository) FindByEmail(ctx context.Context, email string) (*supago.User, error) {
+    row := r.pool.QueryRow(ctx, "SELECT id, full_name, email, created_at FROM users WHERE email = $1", email)
+    // ...
+}
+
+func (r *Repository) ListByActive(ctx context.Context, active bool) ([]supago.User, error) {
+    // ...
+}
+```
+
+Generated methods use `context.Context`, the existing `pgxpool.Pool` abstraction, the generated models, and parameterized SQL — no string concatenation, so the queries are safe from SQL injection.
+
+### Current limitations
+
+Custom queries are intentionally simple in the first iteration:
+
+- `WHERE` conditions only — no joins, subqueries, aggregations, or transactions.
+- Arguments are strictly positional (`$1`, `$2`, …, used sequentially).
+- No `ORDER BY`, `LIMIT`, or `OFFSET`.
+- Conditions are combined with `AND`.
+
+These can be extended in future versions.
+
 ## Environment
 
 ```sh
@@ -151,6 +234,7 @@ SUPAGO_DATABASE_URL=postgresql://postgres:password@localhost:5432/postgres
 | `inspect` | Inspect the database schema and display tables, columns, types, and constraints |
 | `generate model` | Generate Go structs from database tables |
 | `generate repository` | Generate Go repositories with full CRUD per table |
+| `generate query` | Generate custom repository queries defined in `supago.yaml` |
 | `generate crud` | Generate services and HTTP handlers using net/http as a starting point |
 | `generate all` | Run the full generation pipeline (model, repository, crud) |
 | `version` | Print the version of SupaGo |
