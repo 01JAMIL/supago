@@ -11,25 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewGenerateCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "generate",
-		Short: "Generate code from the database schema",
-	}
-
-	cmd.AddCommand(newGenerateModelCmd())
-	cmd.AddCommand(newGenerateRepositoryCmd())
-	cmd.AddCommand(newGenerateCrudCmd())
-	cmd.AddCommand(newGenerateQueryCmd())
-	cmd.AddCommand(newGenerateAllCmd())
-
-	return cmd
-}
-
-func newGenerateModelCmd() *cobra.Command {
+func newGenerateQueryCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "model",
-		Short: "Generate Go structs from database tables",
+		Use:   "query",
+		Short: "Generate custom repository queries from supago.yaml",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			PrintBanner()
 
@@ -38,6 +23,14 @@ func newGenerateModelCmd() *cobra.Command {
 			cfg, err := config.Load("supago.yaml")
 			if err != nil {
 				return fmt.Errorf("load config: %w", err)
+			}
+
+			if len(cfg.Generation.Queries) == 0 {
+				fmt.Println()
+				fmt.Println("ℹ  No custom queries configured.")
+				fmt.Println("ℹ  Add a `queries` section under `generation` in supago.yaml to generate custom repository methods.")
+				fmt.Println()
+				return nil
 			}
 
 			if cfg.Database.URL == "" {
@@ -65,13 +58,28 @@ func newGenerateModelCmd() *cobra.Command {
 				outputDir = "internal/generated"
 			}
 
-			if err := generation.GenerateModels(schema, outputDir); err != nil {
-				return fmt.Errorf("generate models: %w", err)
+			modulePath, err := readModulePath()
+			if err != nil {
+				return fmt.Errorf("read go.mod: %w", err)
 			}
 
-			fmt.Printf("✔ Models generated in %s/models.go\n", outputDir)
+			if err := generation.GenerateQueries(schema, cfg.Generation, outputDir, modulePath); err != nil {
+				return fmt.Errorf("generate queries: %w", err)
+			}
+
+			fmt.Printf("✔ %d custom queries generated in %s/<table>/queries.go\n", countQueries(cfg), outputDir)
+			fmt.Println("ℹ  The generated methods extend the existing repository for each table.")
+			fmt.Println("ℹ  Run `supago generate repository` first if the repositories do not exist yet.")
 
 			return nil
 		},
 	}
+}
+
+func countQueries(cfg *config.Config) int {
+	count := 0
+	for _, queries := range cfg.Generation.Queries {
+		count += len(queries)
+	}
+	return count
 }

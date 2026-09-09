@@ -19,7 +19,13 @@ type DatabaseConfig struct {
 }
 
 type GenerationConfig struct {
-	Output string `yaml:"output"`
+	Output  string                   `yaml:"output"`
+	Queries map[string][]QueryConfig `yaml:"queries"`
+}
+
+type QueryConfig struct {
+	Name  string   `yaml:"name"`
+	Where []string `yaml:"where"`
 }
 
 func Load(path string) (*Config, error) {

@@ -7,5 +7,8 @@ bin/
 # Coverage
 *.out
 
+# agent context
+_context
+
 # macOS
 .DS_Store
